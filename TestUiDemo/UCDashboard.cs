@@ -11,6 +11,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Data.SqlClient;
+using System.IO;
 
 namespace TestUiDemo
 {
@@ -21,8 +22,8 @@ namespace TestUiDemo
         List<ClientOnline> listOnline = new List<ClientOnline>(100);
         bool _isShutdown = false;
         private static Socket server, client;
-        private static byte[] data = new byte[1024];
-        private int size = 1024;
+        private static byte[] data = new byte[1024 * 5000];
+        private int size = 1024 * 5000;
         static UCDashboard _obj;
         public UCDashboard()
         {
@@ -99,8 +100,10 @@ namespace TestUiDemo
 
         private void btn_stop_Click(object sender, EventArgs e)
         {
-
-            UCLog uc = new UCLog();
+            //Làm mới danh sách online
+            listOnline = null;
+            listOnline = new List<ClientOnline>();
+            //Giải phóng client và server
             _isShutdown = true;
             if(client!= null)
                 client.Close();
@@ -110,9 +113,11 @@ namespace TestUiDemo
             Form1.Instance.TaoThongBao.Visible = true;
             Form1.Instance.TaoThongBao.ShowBalloonTip(10);
             //Ghi lịch sử
+            UCLog uc = new UCLog();
             uc.SetUCLog("Máy chủ đã dừng....", DateTime.Now.ToString(), "stop");
             panel_log.Controls.Add(uc);
             panel_log.ScrollControlIntoView(uc);
+            //Điều khiển bật tắt các nút
             btn_stop.Enabled = false;
             btn_start.Enabled = true;
         }
@@ -169,9 +174,11 @@ namespace TestUiDemo
                         //Gửi danh sách tới các client
                         for(int j=1; j<listOnline.Count; j++)
                         {
-                            if (!listOnline[j].nickname.Equals(account[0]))
-                                client.Send(Encoding.UTF8.GetBytes("OnlinePacket:" + listOnline[j].nickname));
+                            for(int k=1; k< listOnline.Count; k++)
+                            if (!listOnline[j].nickname.Equals(listOnline[k].nickname))
+                                    listOnline[j].client.Send(Encoding.UTF8.GetBytes("OnlinePacket:" + listOnline[k].nickname));
                         }
+                        
                         //Cho phép nhận packet từ client
                         client.BeginReceive(data, 0, size, SocketFlags.None, new AsyncCallback(ReceiveData), client);
                         //Chờ kết nối tiếp theo
@@ -181,6 +188,7 @@ namespace TestUiDemo
                     {
                         //Send key 0 báo login fail, tiếp tục mở chờ đăng nhập tiếp theo
                         client.Send(Encoding.UTF8.GetBytes("0"));
+                        client.Close();
                         server.BeginAccept(new AsyncCallback(AcceptConn), server);
                     }
 
@@ -208,11 +216,9 @@ namespace TestUiDemo
                 {
                     if (messagerstring[3] == "/exit")
                     {
-                        /*stringData = "Code:accept exit";
-                        byte[] message = Encoding.UTF8.GetBytes(stringData);
-                        remote.Send(message);
-                        */
-                        //Loại bỏ khỏi danh sách online
+                        //Xóa khỏi list online
+                        listOnline.Remove(new ClientOnline(messagerstring[1], remote));
+                        //Xóa khỏi UI UserOnline
                         User user = new User();
                         user.AddUser(messagerstring[1], client);
                         foreach (User c in UCInbox.Instance.OnlineContainer.Controls)
@@ -230,6 +236,13 @@ namespace TestUiDemo
                         remote.Close();
                         panel_log.Invoke(new Action(() => panel_log.Controls.Add(uc)));
                         panel_log.Invoke(new Action(() => panel_log.ScrollControlIntoView(uc)));
+                        //Gửi danh sách online lại bên các client
+                        for (int j = 1; j < listOnline.Count; j++)
+                        {
+                            for (int k = 1; k < listOnline.Count; k++)
+                                if (!listOnline[j].nickname.Equals(listOnline[k].nickname))
+                                    listOnline[j].client.Send(Encoding.UTF8.GetBytes("OnlinePacket:" + listOnline[k].nickname));
+                        }
                         //Tạo thông báo :))
                         Form1.Instance.TaoThongBao.BalloonTipText = messagerstring[1] + " đã đăng xuất";
                         Form1.Instance.TaoThongBao.Visible = true;
@@ -238,20 +251,22 @@ namespace TestUiDemo
                     else
                     {
                         string messagerfull = stringData.Substring(messagerstring[1].Length + 1 + messagerstring[2].Length + 1 + 2);
-                        byte[] message = Encoding.UTF8.GetBytes(messagerfull);
+                        byte[] message = Encoding.UTF8.GetBytes("m:"+messagerstring[1]+":Public:"+ messagerfull);
                         //Xữ lý gửi tin nhắn đến public
                         if (messagerstring[2].Equals("Public"))
                         {
                             for (int i = 1; i < listOnline.Count; i++)
                             {
-                                if (!listOnline[i].nickname.Equals(messagerstring[0]))
-                                    listOnline[i].client.Send(message);
+                                if (!listOnline[i].nickname.Equals(messagerstring[1]))
+                                    listOnline[i].client.BeginSend(message, 0, message.Length, SocketFlags.None, new
+                               AsyncCallback(SendData), listOnline[i].client);
 
                             }
                             foreach (UCMessger.Messger c in UCInbox.Instance.MessgerContainer.Controls)
                                 if (c.getnickname().Equals(messagerstring[2]))
                                 {
                                     c.SetRecivide(messagerstring[1], messagerfull);
+                                    break;
                                 }
                             Form1.Instance.TaoThongBao.BalloonTipText = "Có tin nhắn mới đến Public";
                             Form1.Instance.TaoThongBao.Visible = true;
@@ -272,22 +287,28 @@ namespace TestUiDemo
                         else
                         //Xữ lý tin nhắn client gửi client
                         {
-
+                            for (int i = 1; i < listOnline.Count; i++)
+                                if (listOnline[i].nickname.Equals(messagerstring[2]))
+                                {
+                                    //Chuyển toàn bộ messenger tới người nhận đích
+                                    listOnline[i].client.BeginSend(data, 0, data.Length, SocketFlags.None, new
+                                           AsyncCallback(SendData), listOnline[i].client);
+                                    break;
+                                }
                         }
-                        remote.BeginReceive(data, 0, size, SocketFlags.None, new AsyncCallback(ReceiveData), remote);
+                        
                     }
-                }
-                catch
-                {
-                    byte[] message = Encoding.UTF8.GetBytes("Sai cú pháp");
-                    remote.Send(message);
                     remote.BeginReceive(data, 0, size, SocketFlags.None, new AsyncCallback(ReceiveData), remote);
                 }
-               
-                   
+                catch { }
             }
             else return;
             
+        }
+        void SendData(IAsyncResult iar)
+        {
+            Socket remote = (Socket)iar.AsyncState;
+            int sent = remote.EndSend(iar);
         }
     }
 }

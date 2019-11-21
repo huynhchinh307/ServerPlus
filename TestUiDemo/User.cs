@@ -14,7 +14,7 @@ namespace TestUiDemo
     public partial class User : UserControl
     {
         public Socket client;
-        string nickname;
+        public string nickname;
         public User()
         {
             InitializeComponent();

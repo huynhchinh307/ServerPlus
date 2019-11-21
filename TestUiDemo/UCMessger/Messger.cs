@@ -78,7 +78,7 @@ namespace TestUiDemo.UCMessger
                 sent.SetSent(txt_messger.Text);
                 panel_log.Controls.Add(sent);
                 panel_log.ScrollControlIntoView(sent);
-                byte[] message = Encoding.UTF8.GetBytes(txt_messger.Text);
+                byte[] message = Encoding.UTF8.GetBytes("m:Server:"+nickname+":"+txt_messger.Text);
                 txt_messger.Clear();
                 client.BeginSend(message, 0, message.Length, SocketFlags.None, new
                                AsyncCallback(SendData), client);

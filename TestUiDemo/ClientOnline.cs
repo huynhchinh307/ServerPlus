@@ -16,5 +16,9 @@ namespace TestUiDemo
             nickname = name;
             client = socket;
         }
+        public override string ToString()
+        {
+            return nickname.ToString();
+        }
     }
 }

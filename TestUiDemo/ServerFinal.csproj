@@ -75,12 +75,6 @@
     <Compile Include="UCDashboard.Designer.cs">
       <DependentUpon>UCDashboard.cs</DependentUpon>
     </Compile>
-    <Compile Include="UCHome.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UCHome.Designer.cs">
-      <DependentUpon>UCHome.cs</DependentUpon>
-    </Compile>
     <Compile Include="UCInbox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -138,9 +132,6 @@
     </Compile>
     <EmbeddedResource Include="UCDashboard.resx">
       <DependentUpon>UCDashboard.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UCHome.resx">
-      <DependentUpon>UCHome.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UCInbox.resx">
       <DependentUpon>UCInbox.cs</DependentUpon>
