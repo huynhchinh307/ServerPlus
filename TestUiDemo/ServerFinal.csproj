@@ -69,6 +69,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThemThanhVien.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ThemThanhVien.Designer.cs">
+      <DependentUpon>ThemThanhVien.cs</DependentUpon>
+    </Compile>
     <Compile Include="UCDashboard.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -105,12 +111,6 @@
     <Compile Include="UCMessger\Sent.Designer.cs">
       <DependentUpon>Sent.cs</DependentUpon>
     </Compile>
-    <Compile Include="UCNext.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UCNext.Designer.cs">
-      <DependentUpon>UCNext.cs</DependentUpon>
-    </Compile>
     <Compile Include="User.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -130,6 +130,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="ThemThanhVien.resx">
+      <DependentUpon>ThemThanhVien.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UCDashboard.resx">
       <DependentUpon>UCDashboard.cs</DependentUpon>
     </EmbeddedResource>
@@ -147,9 +150,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UCMessger\Sent.resx">
       <DependentUpon>Sent.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UCNext.resx">
-      <DependentUpon>UCNext.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="User.resx">
       <DependentUpon>User.cs</DependentUpon>

@@ -176,8 +176,11 @@ namespace TestUiDemo
                         {
                             for(int k=1; k< listOnline.Count; k++)
                             if (!listOnline[j].nickname.Equals(listOnline[k].nickname))
-                                    listOnline[j].client.Send(Encoding.UTF8.GetBytes("OnlinePacket:" + listOnline[k].nickname));
-                        }
+                                {
+                                    listOnline[j].client.Send(Encoding.UTF8.GetBytes("Connect:" + listOnline[k].nickname));
+                                    Thread.Sleep(1000);
+                                }
+                        }                            
                         
                         //Cho phép nhận packet từ client
                         client.BeginReceive(data, 0, size, SocketFlags.None, new AsyncCallback(ReceiveData), client);
@@ -241,7 +244,7 @@ namespace TestUiDemo
                         {
                             for (int k = 1; k < listOnline.Count; k++)
                                 if (!listOnline[j].nickname.Equals(listOnline[k].nickname))
-                                    listOnline[j].client.Send(Encoding.UTF8.GetBytes("OnlinePacket:" + listOnline[k].nickname));
+                                    listOnline[j].client.Send(Encoding.UTF8.GetBytes("Disconnect:" + listOnline[k].nickname));
                         }
                         //Tạo thông báo :))
                         Form1.Instance.TaoThongBao.BalloonTipText = messagerstring[1] + " đã đăng xuất";
@@ -291,7 +294,7 @@ namespace TestUiDemo
                                 if (listOnline[i].nickname.Equals(messagerstring[2]))
                                 {
                                     //Chuyển toàn bộ messenger tới người nhận đích
-                                    listOnline[i].client.BeginSend(data, 0, data.Length, SocketFlags.None, new
+                                    listOnline[i].client.BeginSend(data, 0, recv, SocketFlags.None, new
                                            AsyncCallback(SendData), listOnline[i].client);
                                     break;
                                 }

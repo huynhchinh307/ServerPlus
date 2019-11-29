@@ -99,6 +99,7 @@ namespace TestUiDemo
         {
             select();
             p_user.Visible = true;
+            /*
             if (!Form1.Instance.PnlContainer.Controls.ContainsKey("UCNext"))
             {
                 UCNext un = new UCNext();
@@ -107,6 +108,7 @@ namespace TestUiDemo
             }
             Form1.Instance.PnlContainer.Controls["UCNext"].BringToFront();
             Form1.Instance.BackButton.Visible = true;
+            */
         }
         public void select()
         {
@@ -127,8 +129,8 @@ namespace TestUiDemo
 
         private void btn_adduser_Click(object sender, EventArgs e)
         {
-            select();
-            p_adduser.Visible = true;
+            ThemThanhVien f = new ThemThanhVien();
+            f.ShowDialog();
         }
 
         private void btn_Setting_Click(object sender, EventArgs e)
